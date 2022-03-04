@@ -1,12 +1,13 @@
-import resolve from "@rollup/plugin-node-resolve";
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
-import pkg from "./package.json";
+import pkg from './package.json';
 import typescript from 'rollup-plugin-typescript2';
 
 const commonOutputOptions = {
-  dir: "dist",
+  dir: 'dist',
   preserveModules: true,
-  preserveModulesRoot: "src",
+  preserveModulesRoot: 'src',
 };
 
 function getOutputOptions(options) {
@@ -26,33 +27,32 @@ function withSourceMapOutputOptions(options) {
 function getCJSOutputOptions(options) {
   return {
     ...getOutputOptions(options),
-    format: "cjs",
-    exports: "named",
+    format: 'cjs',
+    exports: 'named',
   };
 }
 
 function getESMOutputOptions(options) {
   return {
     ...getOutputOptions(options),
-    format: "esm",
+    format: 'esm',
   };
 }
 
 export default {
-  input: ["src/index.tsx"],
+  input: ['src/index.tsx'],
   output: [
     // ESM
     getESMOutputOptions(
       withSourceMapOutputOptions({
-        entryFileNames: "[name].esm.js",
+        entryFileNames: '[name].esm.js',
       })
     ),
     // CommonJS
-    getCJSOutputOptions(
-      withSourceMapOutputOptions({})
-    )
+    getCJSOutputOptions(withSourceMapOutputOptions({})),
   ],
   plugins: [
+    commonjs(), // for a mix of `require` and `import` use `{transformMixedEsModules:true}`?!
     peerDepsExternal(),
     resolve(),
     typescript(),
