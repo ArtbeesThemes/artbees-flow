@@ -4,7 +4,7 @@ import { Handle, Position } from 'react-flow-renderer';
 function CustomNode(props: { data: { jsx: React.ReactNode } }) {
   const { data } = props;
   return (
-    <div>
+    <div style={{ pointerEvents: 'all' }}>
       <Handle
         type="target"
         position={Position.Top}

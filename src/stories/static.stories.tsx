@@ -1,11 +1,11 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import ArtbeesFlow from './index';
+import ArtbeesFlow from '../index';
 
 document.body.style.padding = '0';
 
 const meta: ComponentMeta<typeof ArtbeesFlow> = {
-  title: 'Artbees Flow',
+  title: 'Artbees Flow - Static',
   component: ArtbeesFlow,
   argTypes: {
     nodes: {

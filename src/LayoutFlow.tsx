@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   isNode,
@@ -12,10 +12,9 @@ import dagre from 'dagre';
 // base structure comes from https://reactflow.dev/examples/layouting/
 // worth taking a look: https://github.com/wbkd/react-flow/issues/5
 
-const dagreGraph = new dagre.graphlib.Graph();
-dagreGraph.setDefaultEdgeLabel(() => ({}));
-
 const getLayoutedElements = elements => {
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({ rankdir: 'TB' }); // set direction to "Top-to-Bottom"
 
   elements.forEach(el => {
@@ -59,7 +58,8 @@ const LayoutFlow = React.forwardRef(
 
     useEffect(() => {
       setLayoutDone(false);
-    }, elements);
+      setLayoutedElements(elements);
+    }, [elements]);
 
     return (
       // boxSizing: 'border-box' should be for all children. So maybe we should have some sort of css or style tag?
@@ -89,7 +89,8 @@ const LayoutFlow = React.forwardRef(
             <ReactFlowStateHandler
               onNodesChange={nodes => {
                 if (
-                  nodes.filter(node => node.__rf.width).length > 0 &&
+                  nodes.filter(node => node.__rf.width).length ===
+                    nodes.length &&
                   !layoutDone
                 ) {
                   // below hack is to inform react-flow-renderer of the change. without reseting the elements we ended up with an empty canvas! Should definitely find the proper solution.

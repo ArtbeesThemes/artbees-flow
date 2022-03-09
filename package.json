@@ -31,6 +31,7 @@
     "react-dom": ">=16.8.0"
   },
   "devDependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@rollup/plugin-commonjs": "^21.0.2",
     "@rollup/plugin-node-resolve": "^13.0.6",
     "@storybook/addon-actions": "^6.4.8",
@@ -41,6 +42,7 @@
     "@types/dagre": "^0.7.47",
     "@types/jest": "^27.0.3",
     "@types/react": "^17.0.14",
+    "antd": "^4.18.9",
     "babel-loader": "^8.2.2",
     "jest": "^27.4.3",
     "react": "^17.0.2",
