@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import { Edge, ReactFlowProps } from 'react-flow-renderer';
 import rendererElementsFromNodes from './helpers/rendererElementsFromNodes';
 import CustomNode from './components/CustomNode';
@@ -35,12 +35,21 @@ const ArtbeesFlow = React.forwardRef(
     ref: React.Ref<HTMLDivElement>
   ) => {
     const elements = rendererElementsFromNodes(nodes, CUSTOM_NODE_NAME);
+    const [containerWidth, setContainerWidth] = useState<number | null>(null);
+
+    if (!containerWidth) {
+      return (
+        <div
+          ref={el => setContainerWidth(el?.parentElement?.offsetWidth || 700)}
+        ></div>
+      );
+    }
 
     return (
       <LayoutFlow
         ref={ref}
         {...rendererProps}
-        // defaultPosition={[window.innerWidth / 2, 10]}
+        defaultPosition={[containerWidth! / 2, 50]}
         nodeTypes={{
           [CUSTOM_NODE_NAME]: CustomNode,
         }}

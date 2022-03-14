@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
@@ -7,19 +6,27 @@ import ReactFlow, {
   useStoreState,
   Node,
   useStoreActions,
+  Elements,
+  isEdge,
 } from 'react-flow-renderer';
 import dagre from 'dagre';
 
 // base structure comes from https://reactflow.dev/examples/layouting/
 // worth taking a look: https://github.com/wbkd/react-flow/issues/5
 
-const getLayoutedElements = elements => {
+const getLayoutedElements = (elements: Elements<any>) => {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({ rankdir: 'TB' }); // set direction to "Top-to-Bottom"
 
+  let rootId = '';
+
   elements.forEach(el => {
     if (isNode(el)) {
+      if (isRootNode(el, elements)) {
+        rootId = el.id;
+      }
+
       dagreGraph.setNode(el.id, {
         height: el.__rf.height,
         width: el.__rf.width,
@@ -30,6 +37,8 @@ const getLayoutedElements = elements => {
   });
 
   dagre.layout(dagreGraph);
+
+  const rootPosition = dagreGraph.node(rootId);
 
   return elements.map(el => {
     if (isNode(el)) {
@@ -46,8 +55,8 @@ const getLayoutedElements = elements => {
         ...el,
         position: {
           // add position prop immutably
-          x: nodeWithPosition.x - el.__rf.width / 2,
-          y: nodeWithPosition.y - el.__rf.height / 2,
+          x: nodeWithPosition.x - el.__rf.width / 2 - rootPosition.x,
+          y: nodeWithPosition.y - el.__rf.height / 2 - rootPosition.y,
         },
       };
     }
@@ -72,7 +81,7 @@ const LayoutFlow = React.forwardRef(
           .map(el =>
             isNode(el) && existingElementIDs.indexOf(el.id) === -1
               ? { ...el, position: { x: -10000, y: -10000 } }
-              : layoutedElements.find(layoutedEl => layoutedEl.id === el.id)
+              : layoutedElements.find(layoutedEl => layoutedEl.id === el.id)!
           )
       );
     }, [elements]);
@@ -143,4 +152,15 @@ function ReactFlowStateHandler({
     onNodesChange(nodes);
   }, [nodes]);
   return null;
+}
+
+function isRootNode(node: Node<any>, elements: Elements<any>) {
+  for (let el of elements) {
+    if (isEdge(el)) {
+      if (el.target === node.id) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
