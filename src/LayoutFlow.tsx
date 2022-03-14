@@ -6,6 +6,7 @@ import ReactFlow, {
   ReactFlowProps,
   useStoreState,
   Node,
+  useStoreActions,
 } from 'react-flow-renderer';
 import dagre from 'dagre';
 
@@ -39,9 +40,15 @@ const getLayoutedElements = elements => {
       // unfortunately we need this little hack to pass a slightly different position
       // to notify react flow about the change. Moreover we are shifting the dagre node position
       // (anchor=center center) to the top left so it matches the react flow node anchor point (top left).
-      el.position = {
-        x: nodeWithPosition.x - el.__rf.width / 2 + Math.random() / 1000,
-        y: nodeWithPosition.y - el.__rf.height / 2,
+      // ---- NOTE: the 3-line comment above from the example itself doesn't seem relevant. We experienced
+      // ---- the issue that position didn't get updated and it got fixed by being immutable and creating a new object for the node.
+      return {
+        ...el,
+        position: {
+          // add position prop immutably
+          x: nodeWithPosition.x - el.__rf.width / 2,
+          y: nodeWithPosition.y - el.__rf.height / 2,
+        },
       };
     }
 
@@ -58,7 +65,16 @@ const LayoutFlow = React.forwardRef(
 
     useEffect(() => {
       setLayoutDone(false);
-      setLayoutedElements(elements);
+      const existingElementIDs = layoutedElements.map(el => el.id);
+      setLayoutedElements(
+        elements
+          .filter(el => isNode(el) || existingElementIDs.includes(el.id))
+          .map(el =>
+            isNode(el) && existingElementIDs.indexOf(el.id) === -1
+              ? { ...el, position: { x: -10000, y: -10000 } }
+              : layoutedElements.find(layoutedEl => layoutedEl.id === el.id)
+          )
+      );
     }, [elements]);
 
     return (
@@ -89,22 +105,17 @@ const LayoutFlow = React.forwardRef(
             <ReactFlowStateHandler
               onNodesChange={nodes => {
                 if (
-                  nodes.filter(node => node.__rf.width).length ===
+                  nodes.some(node => node.__rf?.height) &&
+                  nodes.filter(node => node.__rf.height).length ===
                     nodes.length &&
                   !layoutDone
                 ) {
-                  // below hack is to inform react-flow-renderer of the change. without reseting the elements we ended up with an empty canvas! Should definitely find the proper solution.
-                  setLayoutedElements([]);
-                  setTimeout(() => {
-                    setLayoutedElements(
-                      getLayoutedElements([
-                        ...nodes,
-                        ...elements.filter(
-                          el => !nodes.some(node => node.id === el.id)
-                        ),
-                      ])
-                    );
-                  }, 0);
+                  setLayoutedElements(
+                    getLayoutedElements([
+                      ...nodes,
+                      ...elements.filter(el => !isNode(el)),
+                    ])
+                  );
                   setLayoutDone(true);
                 }
               }}
@@ -124,6 +135,10 @@ function ReactFlowStateHandler({
   onNodesChange: (nodes: Node[]) => void;
 }) {
   const nodes = useStoreState(state => state.nodes);
+
+  // will later be needed to use along with `requestAnimationFrame`, if we want to implement transition animations.
+  const updateNodePos = useStoreActions(actions => actions.updateNodePos);
+
   useEffect(() => {
     onNodesChange(nodes);
   }, [nodes]);

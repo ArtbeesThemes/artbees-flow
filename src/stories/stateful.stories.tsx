@@ -18,10 +18,24 @@ const AddButton = ({
       title="Add new node"
       content={
         <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-          <Button ghost type="primary" onClick={() => onAdd('decision')}>
+          <Button
+            ghost
+            type="primary"
+            onClick={() => {
+              onAdd('decision');
+              setPopoverVisible(false);
+            }}
+          >
             Decision
           </Button>
-          <Button ghost type="primary" onClick={() => onAdd('action')}>
+          <Button
+            ghost
+            type="primary"
+            onClick={() => {
+              onAdd('action');
+              setPopoverVisible(false);
+            }}
+          >
             Action
           </Button>
         </div>

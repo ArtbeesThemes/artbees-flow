@@ -11,10 +11,10 @@
     "src/test-setup.tsx"
   ],
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2016",
     "module": "esnext",
     "lib": [
-      "es5",
+      "ES2016",
       "dom"
     ],
     "types": ["jest"],
