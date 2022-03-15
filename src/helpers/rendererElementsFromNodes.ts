@@ -17,7 +17,7 @@ function rendererElementsFromNodes(
       type: customNodeName,
     });
     // add edges sourcing from that node
-    node.targets.forEach(target => {
+    (node.targets || []).forEach(target => {
       elements.push({
         ...target.edgeProps,
         id: `${nodeId}->${target.nodeId}`,

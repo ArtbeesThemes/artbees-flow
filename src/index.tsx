@@ -17,7 +17,7 @@ export type NodesMap = {
     // props like `id` can be given to this component by this library and allow Further \
     // customization in a good structure.
     jsx: React.ReactNode;
-    targets: NodeTarget[];
+    targets?: NodeTarget[];
   };
 };
 

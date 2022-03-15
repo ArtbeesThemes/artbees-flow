@@ -49,7 +49,6 @@ Basic.args = {
     },
     'node-2': {
       jsx: 'Left child',
-      targets: [],
     },
     'node-3': {
       jsx: (
