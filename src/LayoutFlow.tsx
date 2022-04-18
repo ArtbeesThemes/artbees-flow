@@ -81,7 +81,12 @@ const LayoutFlow = React.forwardRef(
           .map(el =>
             isNode(el) && existingElementIDs.indexOf(el.id) === -1
               ? { ...el, position: { x: -10000, y: -10000 } }
-              : layoutedElements.find(layoutedEl => layoutedEl.id === el.id)!
+              : {
+                  ...el,
+                  position: (layoutedElements as Node[]).find(
+                    layoutedEl => layoutedEl.id === el.id
+                  )!.position,
+                }
           )
       );
     }, [elements]);
