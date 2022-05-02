@@ -70,14 +70,14 @@ const LayoutFlow = React.forwardRef(
   (rendererProps: ReactFlowProps, ref: React.Ref<HTMLDivElement>) => {
     const { elements } = rendererProps;
     const [layoutedElements, setLayoutedElements] = useState(elements); // initially just set to elements. we apply the layout later on when we have the width and height of each element.
-    const [layoutDone, setLayoutDone] = useState(false);
+    const [lastLayoutedNodes, setLastLayoutedNodes] = useState<Node[]>([]);
 
     useEffect(() => {
-      setLayoutDone(false);
+      setLastLayoutedNodes([]); // to enforce the re-layout at the other part
       const existingElementIDs = layoutedElements.map(el => el.id);
       setLayoutedElements(
         elements
-          .filter(el => isNode(el) || existingElementIDs.includes(el.id))
+          .filter(el => isNode(el) || existingElementIDs.includes(el.id)) // exclude new edges
           .map(el =>
             isNode(el) && existingElementIDs.indexOf(el.id) === -1
               ? { ...el, position: { x: -10000, y: -10000 } }
@@ -122,15 +122,24 @@ const LayoutFlow = React.forwardRef(
                   nodes.some(node => node.__rf?.height) &&
                   nodes.filter(node => node.__rf.height).length ===
                     nodes.length &&
-                  !layoutDone
+                  // to prevent infinite re-rendering:
+                  (nodes.length !== lastLayoutedNodes.length ||
+                    nodes.some(
+                      (node, index) =>
+                        lastLayoutedNodes[index].__rf.width !==
+                          node.__rf.width ||
+                        lastLayoutedNodes[index].__rf.height !==
+                          node.__rf.height
+                    ))
                 ) {
+                  // TODO: run this with debounce
                   setLayoutedElements(
                     getLayoutedElements([
                       ...nodes,
                       ...elements.filter(el => !isNode(el)),
                     ])
                   );
-                  setLayoutDone(true);
+                  setLastLayoutedNodes(nodes);
                 }
               }}
             />

@@ -1,6 +1,6 @@
 import 'antd/dist/antd.css';
 import React, { useState } from 'react';
-import { Button, Modal, Popover } from 'antd';
+import { Button, InputNumber, Modal, Popover } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import ArtbeesFlow, { NodesMap } from '../index';
@@ -86,7 +86,20 @@ const noEdgeProps = {
 const CONNECT_TO_END = false as boolean;
 const endTarget = CONNECT_TO_END ? [{ nodeId: 'END' }] : [];
 
-const NormalNode = ({ title }: { title: string }) => {
+type NodeData = {
+  width: number;
+  height: number;
+};
+
+const NormalNode = ({
+  title,
+  value,
+  onChange,
+}: {
+  title: string;
+  value?: NodeData;
+  onChange?: (v: NodeData) => void;
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const showModal = () => {
@@ -99,21 +112,54 @@ const NormalNode = ({ title }: { title: string }) => {
 
   return (
     <>
-      <Button onClick={showModal}>A sample {title}</Button>
+      <Button
+        style={{ ...(value && { width: value.width, height: value.height }) }}
+        onClick={showModal}
+      >
+        A sample {title}
+      </Button>
       <Modal
+        footer={null}
         title={`${title} Settings`}
         visible={modalVisible}
         onOk={hideModal}
         onCancel={hideModal}
       >
-        <div>Lorem ipsum settings...</div>
+        {value ? (
+          <div>
+            width:
+            <InputNumber
+              style={{ marginRight: 100 }}
+              value={value.width}
+              onChange={num => onChange({ ...value, width: num })}
+              step={20}
+            />
+            height:
+            <InputNumber
+              value={value.height}
+              onChange={num => onChange({ ...value, height: num })}
+              step={20}
+            />
+          </div>
+        ) : (
+          'Lorem ipsum...!'
+        )}
       </Modal>
     </>
   );
 };
 
 type MyState = {
-  [nodeId: string]: { targets: string[]; type: 'decision' | 'action' };
+  [nodeId: string]: {
+    targets: string[];
+    type: 'decision' | 'action';
+    data?: any;
+  };
+};
+
+const initialDecisionData = {
+  width: 200,
+  height: 40,
 };
 
 const MyFlow = () => {
@@ -121,6 +167,7 @@ const MyFlow = () => {
     'root-node': {
       targets: [null, 'node-1'], // decision always has 2 targets
       type: 'decision',
+      data: initialDecisionData,
     },
     'node-1': {
       targets: [null], // always has 1 target
@@ -145,16 +192,33 @@ const MyFlow = () => {
             prevNodes[nodeId].targets[targetIdx],
             ...(nodeType === 'decision' ? [null] : []),
           ],
+          ...(nodeType === 'decision' && {
+            data: initialDecisionData,
+          }),
         },
       }));
     };
 
   const nodesToRender: NodesMap = Object.entries(nodes).reduce(
-    (acc, [nodeId, { targets, type }]) => ({
+    (acc, [nodeId, { targets, type, data }]) => ({
       ...acc,
       ...(type === 'decision' && {
         [nodeId]: {
-          jsx: <NormalNode title="Decision" />,
+          jsx: (
+            <NormalNode
+              title="Decision"
+              value={data}
+              onChange={data =>
+                setNodes({
+                  ...nodes,
+                  [nodeId]: {
+                    ...nodes[nodeId],
+                    data,
+                  },
+                })
+              }
+            />
+          ),
           targets: targets.map((_, index) => ({
             nodeId: `ADD/${nodeId}/${index}`,
             edgeProps: index === 0 ? noEdgeProps : yesEdgeProps,

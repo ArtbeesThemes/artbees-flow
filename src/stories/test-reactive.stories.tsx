@@ -59,4 +59,4 @@ const Reactive: typeof ReactiveTemplate = ReactiveTemplate.bind({});
 Reactive.args = {};
 
 export default meta;
-export { Reactive };
+export const TestReactive = Reactive;
