@@ -65,12 +65,13 @@ const getLayoutedElements = (elements: Elements<any>) => {
   });
 };
 
-// TODO: center horizontally by using the container dimension along with position and dimension of the root node.
 const LayoutFlow = React.forwardRef(
   (rendererProps: ReactFlowProps, ref: React.Ref<HTMLDivElement>) => {
     const { elements } = rendererProps;
     const [layoutedElements, setLayoutedElements] = useState(elements); // initially just set to elements. we apply the layout later on when we have the width and height of each element.
     const [lastLayoutedNodes, setLastLayoutedNodes] = useState<Node[]>([]);
+    const [extent, setExtent] =
+      useState<ReactFlowProps['translateExtent']>(undefined); // used to limit the scrollable area.
 
     useEffect(() => {
       setLastLayoutedNodes([]); // to enforce the re-layout at the other part
@@ -113,6 +114,7 @@ const LayoutFlow = React.forwardRef(
             {...rendererProps}
             elements={layoutedElements}
             elementsSelectable={false} // doc says we should have `pointer-events:all` since we disable this and have clickable elements in nodes
+            translateExtent={extent}
             // onConnect={onConnect}
             // onElementsRemove={onElementsRemove}
           >
@@ -133,12 +135,30 @@ const LayoutFlow = React.forwardRef(
                     ))
                 ) {
                   // TODO: run this with debounce
-                  setLayoutedElements(
-                    getLayoutedElements([
-                      ...nodes,
-                      ...elements.filter(el => !isNode(el)),
-                    ])
-                  );
+                  const newLayoutedElements = getLayoutedElements([
+                    ...nodes,
+                    ...elements.filter(el => !isNode(el)),
+                  ]);
+                  const layoutedNodes = newLayoutedElements.filter(isNode);
+                  setExtent([
+                    [
+                      Math.min(...layoutedNodes.map(n => n.position.x)) -
+                        window.innerWidth / 2,
+                      Math.min(...layoutedNodes.map(n => n.position.y)) -
+                        window.innerHeight / 2,
+                    ],
+                    [
+                      Math.max(
+                        ...layoutedNodes.map(n => n.position.x + n.__rf.width)
+                      ) +
+                        window.innerWidth / 2,
+                      Math.max(
+                        ...layoutedNodes.map(n => n.position.y + n.__rf.height)
+                      ) +
+                        window.innerHeight / 2,
+                    ],
+                  ]);
+                  setLayoutedElements(newLayoutedElements);
                   setLastLayoutedNodes(nodes);
                 }
               }}
