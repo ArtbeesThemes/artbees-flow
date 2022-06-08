@@ -83,7 +83,7 @@ const noEdgeProps = {
 };
 
 // TODO: having the END node as a normal node seems to mess the layout because of the layout engine. Maybe it's a better idea to have a boolean indicator to add the END node after the layout.
-const CONNECT_TO_END = false as boolean;
+const CONNECT_TO_END = true as boolean;
 const endTarget = CONNECT_TO_END ? [{ nodeId: 'END' }] : [];
 
 type NodeData = {

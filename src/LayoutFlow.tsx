@@ -29,10 +29,10 @@ const getLayoutedElements = (elements: Elements<any>) => {
 
       dagreGraph.setNode(el.id, {
         height: el.__rf.height,
-        width: el.__rf.width,
+        width: Math.max(el.__rf.width, 120),
       });
     } else {
-      dagreGraph.setEdge(el.source, el.target);
+      dagreGraph.setEdge(el.target, el.source); // we add the edges with reverse direction and then flip the graph later. This helps to have a better layout when we have final End(Exit) node in the graph.
     }
   });
 
@@ -56,7 +56,7 @@ const getLayoutedElements = (elements: Elements<any>) => {
         position: {
           // add position prop immutably
           x: nodeWithPosition.x - el.__rf.width / 2 - rootPosition.x,
-          y: nodeWithPosition.y - el.__rf.height / 2 - rootPosition.y,
+          y: -(nodeWithPosition.y + el.__rf.height / 2 - rootPosition.y),
         },
       };
     }
