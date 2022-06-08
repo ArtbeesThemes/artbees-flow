@@ -4,11 +4,13 @@ import rendererElementsFromNodes from './helpers/rendererElementsFromNodes';
 import CustomNode from './components/CustomNode';
 import LayoutFlow from './LayoutFlow';
 
+export type EdgeProps = Omit<Edge<any>, 'id' | 'source' | 'target'>;
+
 export type NodeTarget = {
   /** `id` of the target node. */
   nodeId: string;
   // below `any` is type of the `data` key. That key is most likely not needed.
-  edgeProps?: Omit<Edge<any>, 'id' | 'source' | 'target'>;
+  edgeProps?: EdgeProps;
 };
 
 export type NodesMap = {
@@ -23,6 +25,8 @@ export type NodesMap = {
 
 export type ArtbeesFlowProps = {
   nodes: NodesMap;
+  /** Edge props that are by default applied to all  */
+  defaultEdgeProps?: Omit<Edge<any>, 'id' | 'source' | 'target'>;
   /** props to be given to `react-flow-renderer` library for customizations. */
   rendererProps?: Omit<ReactFlowProps, 'elements'>;
 };
@@ -31,10 +35,14 @@ const CUSTOM_NODE_NAME = 'custom';
 
 const ArtbeesFlow = React.forwardRef(
   (
-    { nodes, rendererProps }: ArtbeesFlowProps,
+    { nodes, rendererProps, defaultEdgeProps }: ArtbeesFlowProps,
     ref: React.Ref<HTMLDivElement>
   ) => {
-    const elements = rendererElementsFromNodes(nodes, CUSTOM_NODE_NAME);
+    const elements = rendererElementsFromNodes(
+      nodes,
+      CUSTOM_NODE_NAME,
+      defaultEdgeProps
+    );
     const [containerWidth, setContainerWidth] = useState<number | null>(null);
 
     if (!containerWidth) {

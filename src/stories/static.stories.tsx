@@ -20,7 +20,10 @@ const meta: ComponentMeta<typeof ArtbeesFlow> = {
 
 const BasicTemplate: ComponentStory<typeof ArtbeesFlow> = args => (
   <div style={{ width: '100vw', height: '100vh' }}>
-    <ArtbeesFlow nodes={args.nodes} />
+    <ArtbeesFlow
+      nodes={args.nodes}
+      defaultEdgeProps={{ style: { stroke: 'red' } }}
+    />
   </div>
 );
 

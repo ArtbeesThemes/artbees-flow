@@ -1,10 +1,11 @@
 import React from 'react';
 import { Elements } from 'react-flow-renderer';
-import { NodesMap } from '../index';
+import { EdgeProps, NodesMap } from '../index';
 
 function rendererElementsFromNodes(
   nodes: NodesMap,
-  customNodeName: string
+  customNodeName: string,
+  defaultEdgeProps?: EdgeProps
 ): Elements<{ jsx: React.ReactNode }> {
   const elements: Elements<{ jsx: React.ReactNode }> = [];
   Object.keys(nodes).forEach(nodeId => {
@@ -19,6 +20,7 @@ function rendererElementsFromNodes(
     // add edges sourcing from that node
     (node.targets || []).forEach(target => {
       elements.push({
+        ...defaultEdgeProps,
         ...target.edgeProps,
         id: `${nodeId}->${target.nodeId}`,
         source: nodeId,
