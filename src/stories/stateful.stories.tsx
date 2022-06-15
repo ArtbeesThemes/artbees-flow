@@ -152,7 +152,7 @@ const NormalNode = ({
 type MyState = {
   [nodeId: string]: {
     targets: string[];
-    type: 'decision' | 'action';
+    type: 'decision' | 'action' | 'join';
     data?: any;
   };
 };
@@ -165,13 +165,17 @@ const initialDecisionData = {
 const MyFlow = () => {
   const [nodes, setNodes] = useState<MyState>({
     'root-node': {
-      targets: [null, 'node-1'], // decision always has 2 targets
+      targets: ['join-root', 'node-1'], // decision always has 2 targets
       type: 'decision',
       data: initialDecisionData,
     },
     'node-1': {
-      targets: [null], // always has 1 target
+      targets: ['join-root'], // always has 1 target
       type: 'action',
+    },
+    'join-root': {
+      targets: [null], // always 1 target
+      type: 'join',
     },
   });
 
@@ -188,14 +192,20 @@ const MyFlow = () => {
         },
         [newNodeId]: {
           type: nodeType,
-          targets: [
-            prevNodes[nodeId].targets[targetIdx],
-            ...(nodeType === 'decision' ? [null] : []),
-          ],
+          targets:
+            nodeType === 'decision'
+              ? [`join-${nodeId}`, `join-${nodeId}`]
+              : [prevNodes[nodeId].targets[targetIdx]],
           ...(nodeType === 'decision' && {
             data: initialDecisionData,
           }),
         },
+        ...(nodeType === 'decision' && {
+          [`join-${nodeId}`]: {
+            type: 'join',
+            targets: [prevNodes[nodeId].targets[targetIdx]],
+          },
+        }),
       }));
     };
 
@@ -239,6 +249,12 @@ const MyFlow = () => {
           targets: [{ nodeId: `ADD/${nodeId}` }],
         },
         [`ADD/${nodeId}`]: {
+          jsx: <AddButton onAdd={onAddHandlerFor(nodeId, 0)} />,
+          targets: targets[0] ? [{ nodeId: targets[0] }] : endTarget,
+        },
+      }),
+      ...(type === 'join' && {
+        [nodeId]: {
           jsx: <AddButton onAdd={onAddHandlerFor(nodeId, 0)} />,
           targets: targets[0] ? [{ nodeId: targets[0] }] : endTarget,
         },
