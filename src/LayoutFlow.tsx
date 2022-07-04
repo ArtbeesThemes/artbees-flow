@@ -136,7 +136,12 @@ const LayoutFlow = React.forwardRef(
                 ) {
                   // TODO: run this with debounce
                   const newLayoutedElements = getLayoutedElements([
-                    ...nodes,
+                    // The map below ensures that latest jsx is used from the direct props.
+                    // It fixes an important bug on slow systems where changing props too fast resulted in a race condition that ended up showing old jsx.
+                    ...nodes.map(node => ({
+                      ...elements.find(el => el.id === node.id)!,
+                      __rf: node.__rf,
+                    })),
                     ...elements.filter(el => !isNode(el)),
                   ]);
                   const layoutedNodes = newLayoutedElements.filter(isNode);
