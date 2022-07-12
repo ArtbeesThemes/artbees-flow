@@ -120,20 +120,7 @@ const LayoutFlow = React.forwardRef(
           >
             <ReactFlowStateHandler
               onNodesChange={nodes => {
-                if (
-                  nodes.some(node => node.__rf?.height) &&
-                  nodes.filter(node => node.__rf.height).length ===
-                    nodes.length &&
-                  // to prevent infinite re-rendering:
-                  (nodes.length !== lastLayoutedNodes.length ||
-                    nodes.some(
-                      (node, index) =>
-                        lastLayoutedNodes[index].__rf.width !==
-                          node.__rf.width ||
-                        lastLayoutedNodes[index].__rf.height !==
-                          node.__rf.height
-                    ))
-                ) {
+                if (shouldRelayout(nodes, lastLayoutedNodes)) {
                   // TODO: run this with debounce
                   const newLayoutedElements = getLayoutedElements([
                     // The map below ensures that latest jsx is used from the direct props.
@@ -202,4 +189,20 @@ function isRootNode(node: Node<any>, elements: Elements<any>) {
     }
   }
   return true;
+}
+
+function shouldRelayout(newNodes: Node[], prevNodes: Node[]): Boolean {
+  return (
+    // Is there any node with height?
+    newNodes.some(node => node.__rf?.height) &&
+    // Do all nodes have height?
+    newNodes.filter(node => node.__rf.height).length === newNodes.length &&
+    // Is there any new node OR any change in nodes dimensions relative to last render?
+    (newNodes.length !== prevNodes.length ||
+      newNodes.some(
+        (node, index) =>
+          prevNodes[index].__rf.width !== node.__rf.width ||
+          prevNodes[index].__rf.height !== node.__rf.height
+      ))
+  );
 }
