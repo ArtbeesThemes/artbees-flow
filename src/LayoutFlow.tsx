@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   isNode,
@@ -187,7 +187,7 @@ function ReactFlowStateHandler({
   // will later be needed to use along with `requestAnimationFrame`, if we want to implement transition animations.
   const updateNodePos = useStoreActions(actions => actions.updateNodePos);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     onNodesChange(nodes);
   }, [nodes]);
   return null;
