@@ -7,13 +7,17 @@ import ReactFlow, {
   Node,
   useStoreActions,
 } from 'react-flow-renderer';
+import { Extent, scrollProps, calcFlowExtent } from 'helpers/scrollBehavior';
+import { ScrollScheme } from 'index';
 import { getLayoutedElements } from './helpers/layouterByDagre';
 
+interface CustomFlowProps extends ReactFlowProps {
+  scrollScheme: ScrollScheme;
 }
 
 const LayoutFlow = React.forwardRef(
-  (rendererProps: ReactFlowProps, ref: React.Ref<HTMLDivElement>) => {
-    const { elements } = rendererProps;
+  (props: CustomFlowProps, ref: React.Ref<HTMLDivElement>) => {
+    const { elements, scrollScheme, ...restLibProps } = props;
     const [layoutedElements, setLayoutedElements] = useState(elements); // initially just set to elements. we apply the layout later on when we have the width and height of each element.
     const [lastLayoutedNodes, setLastLayoutedNodes] = useState<Node[]>([]);
     const [extent, setExtent] = useState<Extent>(undefined); // Used to limit the scrollable area.
@@ -43,15 +47,12 @@ const LayoutFlow = React.forwardRef(
         className="artbees-flow__LayoutFlow"
         style={{ flexGrow: 1, width: '100%', height: '100%' }}
       >
-        <style>{`.artbees-flow__LayoutFlow * {
-          box-sizing: border-box;
-        }`}</style>
+        <style>{getFlowStyles(props)}</style>
         <ReactFlowProvider>
           <ReactFlow
-            panOnScroll
-            panOnScrollSpeed={1}
             nodesDraggable={false}
-            {...rendererProps}
+            {...scrollProps(scrollScheme)}
+            {...restLibProps}
             elements={layoutedElements}
             elementsSelectable={false} // doc says we should have `pointer-events:all` since we disable this and have clickable elements in nodes
             translateExtent={extent}
@@ -72,24 +73,7 @@ const LayoutFlow = React.forwardRef(
                     ...elements.filter(el => !isNode(el)),
                   ]);
                   const layoutedNodes = newLayoutedElements.filter(isNode);
-                  setExtent([
-                    [
-                      Math.min(...layoutedNodes.map(n => n.position.x)) -
-                        window.innerWidth / 2,
-                      Math.min(...layoutedNodes.map(n => n.position.y)) -
-                        window.innerHeight / 2,
-                    ],
-                    [
-                      Math.max(
-                        ...layoutedNodes.map(n => n.position.x + n.__rf.width)
-                      ) +
-                        window.innerWidth / 2,
-                      Math.max(
-                        ...layoutedNodes.map(n => n.position.y + n.__rf.height)
-                      ) +
-                        window.innerHeight / 2,
-                    ],
-                  ]);
+                  setExtent(calcFlowExtent(layoutedNodes, scrollScheme));
                   setLayoutedElements(newLayoutedElements);
                   setLastLayoutedNodes(nodes);
                 }
@@ -103,6 +87,22 @@ const LayoutFlow = React.forwardRef(
 );
 
 export default LayoutFlow;
+
+function getFlowStyles(props: CustomFlowProps) {
+  let style = `
+	.artbees-flow__LayoutFlow * {
+		box-sizing: border-box;
+	}`;
+
+  if (props.scrollScheme === 'sellkit') {
+    style += `
+		.react-flow__pane {
+			cursor: grab;
+		}`;
+  }
+
+  return style;
+}
 
 function ReactFlowStateHandler({
   onNodesChange,

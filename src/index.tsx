@@ -23,19 +23,22 @@ export type NodesMap = {
   };
 };
 
+export type ScrollScheme = 'default' | 'sellkit';
+
 export type ArtbeesFlowProps = {
   nodes: NodesMap;
   /** Edge props that are by default applied to all  */
   defaultEdgeProps?: Omit<Edge<any>, 'id' | 'source' | 'target'>;
   /** props to be given to `react-flow-renderer` library for customizations. */
   rendererProps?: Omit<ReactFlowProps, 'elements'>;
+  scrollScheme?: ScrollScheme;
 };
 
 const CUSTOM_NODE_NAME = 'custom';
 
 const ArtbeesFlow = React.forwardRef(
   (
-    { nodes, rendererProps, defaultEdgeProps }: ArtbeesFlowProps,
+    { nodes, rendererProps, defaultEdgeProps, scrollScheme }: ArtbeesFlowProps,
     ref: React.Ref<HTMLDivElement>
   ) => {
     const elements = rendererElementsFromNodes(
@@ -61,6 +64,7 @@ const ArtbeesFlow = React.forwardRef(
         nodeTypes={{
           [CUSTOM_NODE_NAME]: CustomNode,
         }}
+        scrollScheme={scrollScheme || "default"}
         elements={elements}
       />
     );
