@@ -25,20 +25,25 @@ export function scrollProps(scheme: ScrollScheme) {
   return props;
 }
 
-export function calcFlowExtent(nodes: Node[], scheme: ScrollScheme): Extent {
+export function calcFlowExtent(
+  nodes: Node[],
+  scheme: ScrollScheme,
+  container: HTMLDivElement | null
+): Extent {
+  if (!container) {
+    return;
+  }
+
   const w = window.innerWidth;
   const h = window.innerHeight;
-  // TODO: Do the following with "ref" instead of DOM API.
-  const containerHeight = document
-    .getElementsByClassName('artbees-flow__LayoutFlow')[0]
-    .getBoundingClientRect().height;
 
   const topMostY = Math.min(...nodes.map(n => n.position.y));
   const bottomMostY = Math.max(...nodes.map(n => n.position.y + n.__rf.height));
   const leftMostX = Math.min(...nodes.map(n => n.position.x));
   const rightMostX = Math.max(...nodes.map(n => n.position.x + n.__rf.width));
 
-  const flowSmallerThanContainer = bottomMostY - topMostY > containerHeight;
+  const containerHeight = container.getBoundingClientRect().height;
+  const containerFreeSpace = bottomMostY - topMostY - containerHeight;
 
   let left, top, right, bottom;
 
@@ -51,7 +56,8 @@ export function calcFlowExtent(nodes: Node[], scheme: ScrollScheme): Extent {
       break;
     case 'sellkit':
       top = topMostY - 20;
-      bottom = bottomMostY + (flowSmallerThanContainer ? 20 : h / 2);
+      bottom =
+        bottomMostY + (containerFreeSpace > 0 ? 20 : -containerFreeSpace - 20);
       left = leftMostX - w / 2;
       right = rightMostX + w / 2;
       break;

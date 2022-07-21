@@ -21,6 +21,7 @@ const LayoutFlow = React.forwardRef(
     const [layoutedElements, setLayoutedElements] = useState(elements); // initially just set to elements. we apply the layout later on when we have the width and height of each element.
     const [lastLayoutedNodes, setLastLayoutedNodes] = useState<Node[]>([]);
     const [extent, setExtent] = useState<Extent>(undefined); // Used to limit the scrollable area.
+    const [container, setContainer] = useState<HTMLDivElement | null>(null);
 
     useEffect(() => {
       setLastLayoutedNodes([]); // to enforce the re-layout at the other part
@@ -43,7 +44,10 @@ const LayoutFlow = React.forwardRef(
 
     return (
       <div
-        ref={ref}
+        ref={el => {
+          setContainer(el);
+          return ref;
+        }}
         className="artbees-flow__LayoutFlow"
         style={{ flexGrow: 1, width: '100%', height: '100%' }}
       >
@@ -73,7 +77,9 @@ const LayoutFlow = React.forwardRef(
                     ...elements.filter(el => !isNode(el)),
                   ]);
                   const layoutedNodes = newLayoutedElements.filter(isNode);
-                  setExtent(calcFlowExtent(layoutedNodes, scrollScheme));
+                  setExtent(
+                    calcFlowExtent(layoutedNodes, scrollScheme, container)
+                  );
                   setLayoutedElements(newLayoutedElements);
                   setLastLayoutedNodes(nodes);
                 }
