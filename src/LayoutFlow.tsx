@@ -7,7 +7,7 @@ import ReactFlow, {
   Node,
   useStoreActions,
 } from 'react-flow-renderer';
-import { Extent, scrollProps, calcFlowExtent } from 'helpers/scrollBehavior';
+import { Extent, scrollProps, calcFlowExtent } from './helpers/scrollBehavior';
 import { ScrollScheme } from 'index';
 import { getLayoutedElements } from './helpers/layouterByDagre';
 
