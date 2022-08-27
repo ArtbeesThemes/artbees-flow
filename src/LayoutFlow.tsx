@@ -45,8 +45,17 @@ const LayoutFlow = React.forwardRef(
     return (
       <div
         ref={el => {
+          // TODO: investigate if there is a better solution to both forward the ref and use it.
+          if (!el) {
+            return;
+          }
           setContainer(el);
-          return ref;
+          if (typeof ref === 'function') {
+            ref(el);
+          } else if (ref) {
+            // @ts-ignore
+            ref.current = el;
+          }
         }}
         className="artbees-flow__LayoutFlow"
         style={{ flexGrow: 1, width: '100%', height: '100%' }}
