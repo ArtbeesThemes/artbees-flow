@@ -23,7 +23,7 @@ export type NodesMap = {
   };
 };
 
-export type ScrollScheme = 'default' | 'sellkit';
+export type Product = 'growmatik' | 'sellkit';
 
 export type ArtbeesFlowProps = {
   nodes: NodesMap;
@@ -31,14 +31,15 @@ export type ArtbeesFlowProps = {
   defaultEdgeProps?: Omit<Edge<any>, 'id' | 'source' | 'target'>;
   /** props to be given to `react-flow-renderer` library for customizations. */
   rendererProps?: Omit<ReactFlowProps, 'elements'>;
-  scrollScheme?: ScrollScheme;
+  /** Intended to distinguish between the Artbees products specific flow settings */
+  product: Product;
 };
 
 const CUSTOM_NODE_NAME = 'custom';
 
 const ArtbeesFlow = React.forwardRef(
   (
-    { nodes, rendererProps, defaultEdgeProps, scrollScheme }: ArtbeesFlowProps,
+    { nodes, rendererProps, defaultEdgeProps, product }: ArtbeesFlowProps,
     ref: React.Ref<HTMLDivElement>
   ) => {
     const elements = rendererElementsFromNodes(
@@ -64,7 +65,7 @@ const ArtbeesFlow = React.forwardRef(
         nodeTypes={{
           [CUSTOM_NODE_NAME]: CustomNode,
         }}
-        scrollScheme={scrollScheme || "default"}
+        product={product}
         elements={elements}
       />
     );

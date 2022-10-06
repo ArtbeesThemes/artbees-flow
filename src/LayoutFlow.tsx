@@ -7,17 +7,18 @@ import ReactFlow, {
   Node,
   useStoreActions,
 } from 'react-flow-renderer';
-import { Extent, scrollProps, calcFlowExtent } from './helpers/scrollBehavior';
-import { ScrollScheme } from 'index';
+import { Extent, calcFlowExtent } from './helpers/scrollBehavior';
+import { Product } from 'index';
 import { getLayoutedElements } from './helpers/layouterByDagre';
+import { productProps } from 'helpers/productSpecificProps';
 
 interface CustomFlowProps extends ReactFlowProps {
-  scrollScheme: ScrollScheme;
+  product: Product;
 }
 
 const LayoutFlow = React.forwardRef(
   (props: CustomFlowProps, ref: React.Ref<HTMLDivElement>) => {
-    const { elements, scrollScheme, ...restLibProps } = props;
+    const { elements, product, ...restLibProps } = props;
     const [layoutedElements, setLayoutedElements] = useState(elements); // initially just set to elements. we apply the layout later on when we have the width and height of each element.
     const [lastLayoutedNodes, setLastLayoutedNodes] = useState<Node[]>([]);
     const [extent, setExtent] = useState<Extent>(undefined); // Used to limit the scrollable area.
@@ -64,7 +65,7 @@ const LayoutFlow = React.forwardRef(
         <ReactFlowProvider>
           <ReactFlow
             nodesDraggable={false}
-            {...scrollProps(scrollScheme)}
+            {...productProps(product)}
             {...restLibProps}
             elements={layoutedElements}
             elementsSelectable={false} // doc says we should have `pointer-events:all` since we disable this and have clickable elements in nodes
@@ -86,9 +87,7 @@ const LayoutFlow = React.forwardRef(
                     ...elements.filter(el => !isNode(el)),
                   ]);
                   const layoutedNodes = newLayoutedElements.filter(isNode);
-                  setExtent(
-                    calcFlowExtent(layoutedNodes, scrollScheme, container)
-                  );
+                  setExtent(calcFlowExtent(layoutedNodes, container));
                   setLayoutedElements(newLayoutedElements);
                   setLastLayoutedNodes(nodes);
                 }
@@ -109,7 +108,7 @@ function getFlowStyles(props: CustomFlowProps) {
 		box-sizing: border-box;
 	}`;
 
-  if (props.scrollScheme === 'sellkit') {
+  if (props.product === 'sellkit') {
     style += `
 		.react-flow__pane {
 			cursor: grab;
