@@ -1,5 +1,4 @@
 import { Node, ReactFlowProps } from 'react-flow-renderer';
-import { Product } from 'index';
 
 export type Extent = ReactFlowProps['translateExtent'];
 
