@@ -17,7 +17,7 @@ export const getLayoutedElements = (elements: Elements<any>) => {
       }
 
       dagreGraph.setNode(el.id, {
-        height: el.__rf.height,
+        height: el.data?.hidden ? 0 : el.__rf.height,
         width: Math.max(el.__rf.width, 120),
       });
     } else {

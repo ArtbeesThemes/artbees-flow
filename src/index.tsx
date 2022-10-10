@@ -20,6 +20,7 @@ export type NodesMap = {
     // customization in a good structure.
     jsx: React.ReactNode;
     targets?: NodeTarget[];
+    isHidden?: boolean;
   };
 };
 

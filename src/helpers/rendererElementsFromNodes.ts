@@ -7,15 +7,19 @@ function rendererElementsFromNodes(
   customNodeName: string,
   defaultEdgeProps?: EdgeProps
 ): Elements<{ jsx: React.ReactNode }> {
-  const elements: Elements<{ jsx: React.ReactNode }> = [];
+  const elements: Elements<{ jsx: React.ReactNode; hidden?: boolean }> = [];
   Object.keys(nodes).forEach(nodeId => {
     const node = nodes[nodeId];
     // add the node itself
     elements.push({
       id: nodeId,
       position: { x: 0, y: 0 },
-      data: { jsx: node.jsx },
+      data: {
+        jsx: node.isHidden ? 'empty' : node.jsx,
+        hidden: node.isHidden,
+      },
       type: customNodeName,
+      style: { visibility: node.isHidden ? 'hidden' : 'visible' },
     });
     // add edges sourcing from that node
     (node.targets || []).forEach(target => {
