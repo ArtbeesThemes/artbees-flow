@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Edge, ReactFlowProps } from 'react-flow-renderer';
+import { Edge, OnLoadParams, ReactFlowProps } from 'react-flow-renderer';
 import rendererElementsFromNodes from './helpers/rendererElementsFromNodes';
 import CustomNode from './components/CustomNode';
 import LayoutFlow from './LayoutFlow';
@@ -26,6 +26,8 @@ export type NodesMap = {
 
 export type Product = 'growmatik' | 'sellkit';
 
+export type FlowInstance = OnLoadParams<any>;
+
 export type ArtbeesFlowProps = {
   nodes: NodesMap;
   /** Edge props that are by default applied to all  */
@@ -34,13 +36,20 @@ export type ArtbeesFlowProps = {
   rendererProps?: Omit<ReactFlowProps, 'elements'>;
   /** Intended to distinguish between the Artbees products specific flow settings */
   product: Product;
+  setFlowInstance?: (instance: FlowInstance) => void;
 };
 
 const CUSTOM_NODE_NAME = 'custom';
 
 const ArtbeesFlow = React.forwardRef(
   (
-    { nodes, rendererProps, defaultEdgeProps, product }: ArtbeesFlowProps,
+    {
+      nodes,
+      rendererProps,
+      defaultEdgeProps,
+      product,
+      setFlowInstance,
+    }: ArtbeesFlowProps,
     ref: React.Ref<HTMLDivElement>
   ) => {
     const elements = rendererElementsFromNodes(
@@ -67,6 +76,7 @@ const ArtbeesFlow = React.forwardRef(
           [CUSTOM_NODE_NAME]: CustomNode,
         }}
         product={product}
+        setFlowInstance={setFlowInstance}
         elements={elements}
       />
     );

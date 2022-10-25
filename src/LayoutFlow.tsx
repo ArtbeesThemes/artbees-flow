@@ -6,6 +6,7 @@ import ReactFlow, {
   useStoreState,
   Node,
   useStoreActions,
+  OnLoadParams,
 } from 'react-flow-renderer';
 import { Extent, calcFlowExtent } from './helpers/scrollBehavior';
 import { Product } from 'index';
@@ -14,6 +15,7 @@ import { productProps } from 'helpers/productSpecificProps';
 
 interface CustomFlowProps extends ReactFlowProps {
   product: Product;
+  setFlowInstance?: (instance: OnLoadParams<any>) => void;
 }
 
 const LayoutFlow = React.forwardRef(
@@ -70,6 +72,9 @@ const LayoutFlow = React.forwardRef(
             elements={layoutedElements}
             elementsSelectable={false} // doc says we should have `pointer-events:all` since we disable this and have clickable elements in nodes
             translateExtent={extent}
+            onLoad={flow =>
+              props.setFlowInstance && props.setFlowInstance(flow)
+            }
             // onConnect={onConnect}
             // onElementsRemove={onElementsRemove}
           >

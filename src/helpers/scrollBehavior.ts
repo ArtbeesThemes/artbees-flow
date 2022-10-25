@@ -23,8 +23,8 @@ export function calcFlowExtent(
   const top = topMostY - 20;
   const bottom =
     bottomMostY + (containerFreeSpace > 0 ? 20 : -containerFreeSpace - 20);
-  const left = leftMostX - w / 2;
-  const right = rightMostX + w / 2;
+  const left = leftMostX - 30;
+  const right = rightMostX + 30;
 
   return [
     [left, top],
