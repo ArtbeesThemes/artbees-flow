@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { Handle, Position } from 'react-flow-renderer';
 
 function CustomNode(props: {
-  data: { jsx: React.ReactNode; hidden?: boolean };
+  data: { jsx: React.ReactNode; hidden?: boolean; style?: CSSProperties };
 }) {
   const { data } = props;
 
@@ -14,7 +14,7 @@ function CustomNode(props: {
     : { top: 0 };
 
   return (
-    <div style={{ pointerEvents: 'all' }}>
+    <div style={{ pointerEvents: 'all', ...data.style }}>
       <Handle
         type="target"
         position={data.hidden ? Position.Bottom : Position.Top}

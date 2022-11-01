@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { Elements } from 'react-flow-renderer';
 import { EdgeProps, NodesMap } from '../index';
 
@@ -7,7 +7,11 @@ function rendererElementsFromNodes(
   customNodeName: string,
   defaultEdgeProps?: EdgeProps
 ): Elements<{ jsx: React.ReactNode }> {
-  const elements: Elements<{ jsx: React.ReactNode; hidden?: boolean }> = [];
+  const elements: Elements<{
+    jsx: React.ReactNode;
+    hidden?: boolean;
+    style?: CSSProperties;
+  }> = [];
   Object.keys(nodes).forEach(nodeId => {
     const node = nodes[nodeId];
     // add the node itself
@@ -17,6 +21,7 @@ function rendererElementsFromNodes(
       data: {
         jsx: node.isHidden ? 'empty' : node.jsx,
         hidden: node.isHidden,
+        style: node.style,
       },
       type: customNodeName,
       style: { visibility: node.isHidden ? 'hidden' : 'visible' },

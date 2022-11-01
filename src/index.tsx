@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { CSSProperties, useState } from 'react';
 import { Edge, OnLoadParams, ReactFlowProps } from 'react-flow-renderer';
 import rendererElementsFromNodes from './helpers/rendererElementsFromNodes';
 import CustomNode from './components/CustomNode';
@@ -21,6 +21,7 @@ export type NodesMap = {
     jsx: React.ReactNode;
     targets?: NodeTarget[];
     isHidden?: boolean;
+    style?: CSSProperties;
   };
 };
 
