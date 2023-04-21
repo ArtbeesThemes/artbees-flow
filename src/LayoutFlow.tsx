@@ -57,25 +57,50 @@ const LayoutFlow = React.forwardRef(
       );
     }, [elements]);
 
+    const handleOnNodeChange = (nodes: Node[]) => {
+      if (shouldRelayout(nodes, lastLayoutedNodes)) {
+        // TODO: run this with debounce
+        const newLayoutedElements = getLayoutedElements([
+          // The map below ensures that latest jsx is used from the direct props.
+          // It fixes an important bug on slow systems where changing props too fast resulted in a race condition that ended up showing old jsx.
+          ...nodes.map(node => ({
+            ...elements.find(el => el.id === node.id)!,
+            __rf: node.__rf,
+          })),
+          ...elements.filter(el => !isNode(el)),
+        ]);
+
+        const layoutedNodes = newLayoutedElements.filter(isNode);
+
+        setExtent(calcFlowExtent(layoutedNodes, container, extentAdditions));
+
+        setLayoutedElements(newLayoutedElements);
+        setLastLayoutedNodes(nodes);
+      }
+    };
+
+    const setRef = (el: HTMLDivElement | null) => {
+      if (!el) return;
+      setContainer(el);
+
+      if (typeof ref === 'function') {
+        ref(el);
+        return;
+      }
+
+      if (ref) {
+        // @ts-ignore
+        ref.current = el;
+      }
+    };
+
     return (
       <div
-        ref={el => {
-          // TODO: investigate if there is a better solution to both forward the ref and use it.
-          if (!el) {
-            return;
-          }
-          setContainer(el);
-          if (typeof ref === 'function') {
-            ref(el);
-          } else if (ref) {
-            // @ts-ignore
-            ref.current = el;
-          }
-        }}
+        ref={setRef}
         className="artbees-flow__LayoutFlow"
         style={{ flexGrow: 1, width: '100%', height: '100%' }}
       >
-        <style>{getFlowStyles(props)}</style>
+        <style>{getFlowStyles(product)}</style>
         <ReactFlowProvider>
           <ReactFlow
             nodesDraggable={false}
@@ -93,26 +118,7 @@ const LayoutFlow = React.forwardRef(
             // onConnect={onConnect}
             // onElementsRemove={onElementsRemove}
           >
-            <ReactFlowStateHandler
-              onNodesChange={nodes => {
-                if (shouldRelayout(nodes, lastLayoutedNodes)) {
-                  // TODO: run this with debounce
-                  const newLayoutedElements = getLayoutedElements([
-                    // The map below ensures that latest jsx is used from the direct props.
-                    // It fixes an important bug on slow systems where changing props too fast resulted in a race condition that ended up showing old jsx.
-                    ...nodes.map(node => ({
-                      ...elements.find(el => el.id === node.id)!,
-                      __rf: node.__rf,
-                    })),
-                    ...elements.filter(el => !isNode(el)),
-                  ]);
-                  const layoutedNodes = newLayoutedElements.filter(isNode);
-                  setExtent(calcFlowExtent(layoutedNodes, container));
-                  setLayoutedElements(newLayoutedElements);
-                  setLastLayoutedNodes(nodes);
-                }
-              }}
-            />
+            <ReactFlowStateHandler onNodesChange={handleOnNodeChange} />
           </ReactFlow>
         </ReactFlowProvider>
       </div>
@@ -122,13 +128,13 @@ const LayoutFlow = React.forwardRef(
 
 export default LayoutFlow;
 
-function getFlowStyles(props: CustomFlowProps) {
+function getFlowStyles(product: Product) {
   let style = `
 	.artbees-flow__LayoutFlow * {
 		box-sizing: border-box;
 	}`;
 
-  if (props.product === 'sellkit') {
+  if (product === 'sellkit') {
     style += `
 		.react-flow__pane {
 			cursor: grab;
