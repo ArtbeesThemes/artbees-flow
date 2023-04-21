@@ -2,29 +2,47 @@ import { Node, ReactFlowProps } from 'react-flow-renderer';
 
 export type Extent = ReactFlowProps['translateExtent'];
 
+export type ExtentAddition = {
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+};
+
 export function calcFlowExtent(
   nodes: Node[],
-  container: HTMLDivElement | null
+  container: HTMLDivElement | null,
+  /** Extra adjustments received directly from user. */
+  extentAddition?: ExtentAddition
 ): Extent {
   if (!container) {
     return;
   }
 
-  const w = window.innerWidth;
+  // Adjustments
+  const addTop = extentAddition?.top || 20;
+  const addBottom = extentAddition?.bottom || 20;
+  const addLeft = extentAddition?.left || 30;
+  const addRight = extentAddition?.right || 30;
 
-  const topMostY = Math.min(...nodes.map(n => n.position.y));
-  const bottomMostY = Math.max(...nodes.map(n => n.position.y + n.__rf.height));
-  const leftMostX = Math.min(...nodes.map(n => n.position.x));
-  const rightMostX = Math.max(...nodes.map(n => n.position.x + n.__rf.width));
+  // Filter only visible nodes
+  const Vodes = nodes.filter(n => !n.data?.hidden);
 
+  // Calculate physical extent of nodes
+  const topMostY = Math.min(...Vodes.map(n => n.position.y));
+  const leftMostX = Math.min(...Vodes.map(n => n.position.x));
+  const rightMostX = Math.max(...Vodes.map(n => n.position.x + n.__rf.width));
+  const bottomMostY = Math.max(...Vodes.map(n => n.position.y + n.__rf.height));
+
+  // Calculate free space in flow (whether nodes span to longer than the container)
   const containerHeight = container.getBoundingClientRect().height;
-  const containerFreeSpace = bottomMostY - topMostY - containerHeight;
+  const freeSpace = containerHeight - (bottomMostY - (topMostY - addTop));
 
-  const top = topMostY - 20;
-  const bottom =
-    bottomMostY + (containerFreeSpace > 0 ? 20 : -containerFreeSpace - 20);
-  const left = leftMostX - 30;
-  const right = rightMostX + 30;
+  // Calculate real extent (physical + adjustments)
+  const top = topMostY - addTop;
+  const left = leftMostX - addLeft;
+  const right = rightMostX + addRight;
+  const bottom = bottomMostY + (freeSpace < 0 ? addBottom : freeSpace);
 
   return [
     [left, top],

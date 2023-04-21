@@ -8,7 +8,11 @@ import ReactFlow, {
   useStoreActions,
   OnLoadParams,
 } from 'react-flow-renderer';
-import { Extent, calcFlowExtent } from './helpers/scrollBehavior';
+import {
+  Extent,
+  ExtentAddition,
+  calcFlowExtent,
+} from './helpers/scrollBehavior';
 import { Product } from 'index';
 import { getLayoutedElements } from './helpers/layouterByDagre';
 import { productProps } from 'helpers/productSpecificProps';
@@ -16,11 +20,19 @@ import { productProps } from 'helpers/productSpecificProps';
 interface CustomFlowProps extends ReactFlowProps {
   product: Product;
   setFlowInstance?: (instance: OnLoadParams<any>) => void;
+  extentAdditions?: ExtentAddition;
 }
 
 const LayoutFlow = React.forwardRef(
   (props: CustomFlowProps, ref: React.Ref<HTMLDivElement>) => {
-    const { elements, product, ...restLibProps } = props;
+    const {
+      elements,
+      product,
+      extentAdditions,
+      setFlowInstance,
+      ...restLibProps
+    } = props;
+
     const [layoutedElements, setLayoutedElements] = useState(elements); // initially just set to elements. we apply the layout later on when we have the width and height of each element.
     const [lastLayoutedNodes, setLastLayoutedNodes] = useState<Node[]>([]);
     const [extent, setExtent] = useState<Extent>(undefined); // Used to limit the scrollable area.
@@ -72,9 +84,12 @@ const LayoutFlow = React.forwardRef(
             elements={layoutedElements}
             elementsSelectable={false} // doc says we should have `pointer-events:all` since we disable this and have clickable elements in nodes
             translateExtent={extent}
-            onLoad={flow =>
-              props.setFlowInstance && props.setFlowInstance(flow)
-            }
+            onLoad={flow => {
+              setFlowInstance && setFlowInstance(flow);
+              // Due to an unknown reason the flow extent doesn't get applied in first render until we
+              // do some manipulation on the flow. (chose zoomTo(1) because it's a neutral command)
+              flow.zoomTo(1);
+            }}
             // onConnect={onConnect}
             // onElementsRemove={onElementsRemove}
           >

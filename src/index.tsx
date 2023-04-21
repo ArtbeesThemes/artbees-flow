@@ -3,6 +3,7 @@ import { Edge, OnLoadParams, ReactFlowProps } from 'react-flow-renderer';
 import rendererElementsFromNodes from './helpers/rendererElementsFromNodes';
 import CustomNode from './components/CustomNode';
 import LayoutFlow from './LayoutFlow';
+import { ExtentAddition } from 'helpers/scrollBehavior';
 
 export type EdgeProps = Omit<Edge<any>, 'id' | 'source' | 'target'>;
 
@@ -38,6 +39,8 @@ export type ArtbeesFlowProps = {
   /** Intended to distinguish between the Artbees products specific flow settings */
   product: Product;
   setFlowInstance?: (instance: FlowInstance) => void;
+  /** Pixels to add to default flow extent on each side. */
+  extentAdditions?: ExtentAddition;
 };
 
 const CUSTOM_NODE_NAME = 'custom';
@@ -50,6 +53,7 @@ const ArtbeesFlow = React.forwardRef(
       defaultEdgeProps,
       product,
       setFlowInstance,
+      extentAdditions,
     }: ArtbeesFlowProps,
     ref: React.Ref<HTMLDivElement>
   ) => {
@@ -78,6 +82,7 @@ const ArtbeesFlow = React.forwardRef(
         }}
         product={product}
         setFlowInstance={setFlowInstance}
+        extentAdditions={extentAdditions}
         elements={elements}
       />
     );
